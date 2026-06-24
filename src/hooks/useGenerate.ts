@@ -8,8 +8,8 @@ export function useGenerate() {
   const [result, setResult] = useState<GenerateResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [lastIdea, setLastIdea] = useState("");
 
-  // Restore last session on mount
   useEffect(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -22,12 +22,13 @@ export function useGenerate() {
   async function generate(projectIdea: string) {
     setLoading(true);
     setError(null);
+    setLastIdea(projectIdea);
     try {
       const data = await generatePlan(projectIdea);
       setResult(data);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Cannot reach the server — please try again shortly.");
+      setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
@@ -39,5 +40,5 @@ export function useGenerate() {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  return { result, loading, error, generate, reset };
+  return { result, loading, error, generate, reset, lastIdea };
 }

@@ -49,24 +49,24 @@ export function LandingPage({ onGenerate, loading, error }: Props) {
         </div>
 
         {/* Headline */}
-        <div className="w-full h-6 xs:h-[72px] sm:h-22.5 md:h-20 flex items-center justify-center overflow-hidden">
-          <h1 className="text-[20px] xs:text-[24px] sm:text-[36px] md:text-[48px] font-black tracking-[-1px] sm:tracking-[-2px] leading-tight text-white text-center w-full">
-            <TextType
-              text={[
-                "Your AI Hackathon Teammate",
-                "From Idea to Blueprint",
-                "Build Smarter, Ship Faster",
-              ]}
-              typingSpeed={55}
-              deletingSpeed={28}
-              pauseDuration={2200}
-              cursorCharacter="|"
-              cursorClassName="text-violet-400"
-              showCursor={true}
-              loop={true}
-              className="text-white"
-            />
-          </h1>
+        <div className="w-full flex items-center justify-center h-10 sm:h-12">          
+          <h1 className="text-[20px] sm:text-[30px] md:text-[36px] font-black tracking-[-0.5px] sm:tracking-[-1px] leading-none text-white text-center whitespace-nowrap">
+          <TextType
+            text={[
+              "Your AI Hackathon Teammate",
+              "From Idea to Blueprint",
+              "Build Smarter, Ship Faster",
+            ]}
+            typingSpeed={55}
+            deletingSpeed={28}
+            pauseDuration={2200}
+            cursorCharacter="|"
+            cursorClassName="text-violet-400"
+            showCursor={true}
+            loop={true}
+            className="text-white"
+          />
+        </h1>
         </div>
 
         {/* Subtitle */}

@@ -2,32 +2,36 @@ import type { MVPScope } from "../types";
 
 export function MVPScopeTab({ scope }: { scope: MVPScope }) {
   return (
-    <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
+    <div className="max-w-3xl mx-auto space-y-8">
       <div>
-        <h3 className="text-sm font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <span className="w-2 h-2 rounded-full bg-emerald-400" />
-          In MVP ({scope.included.length})
-        </h3>
+          <h3 className="text-sm font-semibold text-emerald-400 uppercase tracking-widest">
+            In MVP — {scope.included.length} features
+          </h3>
+        </div>
         <div className="space-y-3">
           {scope.included.map((f, i) => (
-            <div key={i} className="bg-white/3 border border-white/[0.07] rounded-2xl p-4 hover:border-emerald-500/20 transition-colors">
-              <p className="text-white text-sm font-medium mb-1">{f.feature}</p>
-              <p className="text-zinc-500 text-xs leading-relaxed">{f.reason}</p>
+            <div key={i} className="bg-white/3 border border-white/8 rounded-xl p-5 hover:border-emerald-500/20 transition-colors">
+              <p className="text-white font-medium text-[15px] mb-1.5">{f.feature}</p>
+              <p className="text-zinc-500 text-sm leading-relaxed">{f.reason}</p>
             </div>
           ))}
         </div>
       </div>
 
       <div>
-        <h3 className="text-sm font-semibold text-red-400 mb-4 flex items-center gap-2">
+        <div className="flex items-center gap-2 mb-4">
           <span className="w-2 h-2 rounded-full bg-red-400" />
-          Cut for Now ({scope.excluded.length})
-        </h3>
+          <h3 className="text-sm font-semibold text-red-400 uppercase tracking-widest">
+            Cut for now — {scope.excluded.length} features
+          </h3>
+        </div>
         <div className="space-y-3">
           {scope.excluded.map((f, i) => (
-            <div key={i} className="bg-white/2 border border-white/5 rounded-2xl p-4 opacity-60">
-              <p className="text-zinc-400 text-sm font-medium mb-1 line-through decoration-zinc-600">{f.feature}</p>
-              <p className="text-zinc-600 text-xs leading-relaxed">{f.reason}</p>
+            <div key={i} className="bg-white/2 border border-white/5 rounded-xl p-5 opacity-50">
+              <p className="text-zinc-400 font-medium text-[15px] mb-1.5 line-through decoration-zinc-600">{f.feature}</p>
+              <p className="text-zinc-600 text-sm leading-relaxed">{f.reason}</p>
             </div>
           ))}
         </div>
