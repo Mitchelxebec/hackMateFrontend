@@ -27,7 +27,7 @@ export function useGenerate() {
       setResult(data);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Something went wrong");
+      setError(err instanceof Error ? err.message : "Cannot reach the server — please try again shortly.");
     } finally {
       setLoading(false);
     }
