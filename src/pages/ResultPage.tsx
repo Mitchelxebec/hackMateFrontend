@@ -6,6 +6,7 @@ import { MVPScopeTab } from "../components/MVPScopeTab";
 import { ArchitectureTab } from "../components/ArchitectureTab";
 import { DBSchemaTab } from "../components/DBSchema";
 import { SprintBoardTab } from "../components/SprintBoardTab";
+import logo from "../assets/HackthonTeammateLogo.png";
 
 interface Props {
   result: GenerateResponse;
@@ -33,42 +34,57 @@ export function ResultsPage({ result, onReset }: Props) {
   }
 
   return (
-    <div className="min-h-screen bg-[#03040a] text-white flex flex-col">
+    <div
+      className="min-h-screen bg-[#05070f] text-white flex flex-col"
+      style={{ fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" }}
+    >
+      {/* Subtle top glow matching landing page */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 h-64 bg-[radial-gradient(ellipse_60%_40%_at_50%_-10%,rgba(99,102,241,0.15),transparent)] z-0" />
+
       {/* Header */}
-      <header className="border-b border-white/10 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <div className="w-6 h-6 rounded-md bg-gradient-to-br from-blue-500 to-cyan-400 flex items-center justify-center text-xs font-bold">H</div>
-            <span className="font-semibold text-sm">HackPilot</span>
+      <header className="relative z-10 border-b border-white/6 px-6 md:px-10 py-4 flex items-center justify-between bg-[#05070f]/80 backdrop-blur-sm top-0">
+        <div className="flex items-center gap-4 min-w-0">
+          {/* Logo */}
+          <div className="flex items-center gap-2 shrink-0">
+            <div className="w-7 h-7 rounded-full border border-violet-500/30 bg-violet-500/10 flex items-center justify-center shadow-[0_0_16px_rgba(139,92,246,0.25)]">
+              <img src={logo} alt="HackPilot" className="w-4 h-4 object-contain" />
+            </div>
+            <span className="font-bold text-sm text-white">HackPilot</span>
           </div>
-          <div className="w-px h-4 bg-white/10" />
-          <button onClick={onReset} className="flex items-center gap-1.5 text-white/40 hover:text-white text-sm transition-colors">
+
+          <div className="w-px h-4 bg-white/10 shrink-0" />
+
+          <button
+            onClick={onReset}
+            className="flex items-center gap-1.5 text-zinc-500 hover:text-white text-sm transition-colors shrink-0"
+          >
             <ArrowLeft size={13} /> New Plan
           </button>
-          <div className="w-px h-4 bg-white/10" />
-          <p className="text-white/70 text-sm truncate max-w-sm">{result.projectIdea}</p>
+
+          <div className="w-px h-4 bg-white/10 shrink-0 hidden sm:block" />
+          <p className="text-zinc-500 text-sm truncate hidden sm:block">{result.projectIdea}</p>
         </div>
 
         <button
           onClick={copySession}
-          className="flex items-center gap-2 px-3 py-1.5 border border-white/10 rounded-lg text-xs text-white/40 hover:text-white hover:border-white/20 transition-all"
+          className="flex items-center gap-2 px-3 py-1.5 border border-white/8 hover:border-violet-500/40 rounded-lg text-xs text-zinc-500 hover:text-violet-400 transition-all shrink-0 ml-4"
         >
-          {copied ? <Check size={12} className="text-green-400" /> : <Copy size={12} />}
+          {copied ? <Check size={12} className="text-emerald-400" /> : <Copy size={12} />}
           {copied ? "Copied!" : "Session ID"}
         </button>
       </header>
 
-      {/* Tabs */}
-      <div className="border-b border-white/10 px-6 bg-[#03040a]">
-        <div className="flex gap-0">
+      {/* Tab bar */}
+      <div className="relative z-10 border-b border-white/6 px-4 md:px-10 bg-[#05070f]/80 backdrop-blur-sm overflow-x-auto">
+        <div className="flex gap-0 min-w-max">
           {TABS.map(({ id, label, icon: Icon }) => (
             <button
               key={id}
               onClick={() => setActiveTab(id)}
-              className={`flex items-center gap-2 px-5 py-3.5 text-sm font-medium border-b-2 transition-all ${
+              className={`flex items-center gap-2 px-4 md:px-5 py-3.5 text-sm font-medium border-b-2 transition-all whitespace-nowrap ${
                 activeTab === id
-                  ? "border-cyan-400 text-white"
-                  : "border-transparent text-white/30 hover:text-white/60"
+                  ? "border-violet-500 text-white"
+                  : "border-transparent text-zinc-600 hover:text-zinc-300"
               }`}
             >
               <Icon size={13} />
@@ -79,7 +95,7 @@ export function ResultsPage({ result, onReset }: Props) {
       </div>
 
       {/* Content */}
-      <main className="flex-1 overflow-auto p-6">
+      <main className="relative z-10 flex-1 overflow-auto p-4 md:p-8">
         {activeTab === "stories" && <UserStoriesTab stories={result.userStories} />}
         {activeTab === "mvp"     && <MVPScopeTab scope={result.mvpScope} />}
         {activeTab === "arch"    && <ArchitectureTab architecture={result.architecture} />}

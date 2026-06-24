@@ -4,41 +4,30 @@ export function MVPScopeTab({ scope }: { scope: MVPScope }) {
   return (
     <div className="max-w-4xl mx-auto grid md:grid-cols-2 gap-6">
       <div>
-        <h3 className="text-sm font-semibold text-green-400 mb-3 flex items-center gap-2 font-mono-display">
-          <span className="w-2 h-2 rounded-full bg-green-400" />
+        <h3 className="text-sm font-semibold text-emerald-400 mb-4 flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-emerald-400" />
           In MVP ({scope.included.length})
         </h3>
         <div className="space-y-3">
           {scope.included.map((f, i) => (
-            <div
-              key={i}
-              className="bg-white/5 border border-white/10 rounded-xl p-4"
-            >
+            <div key={i} className="bg-white/3 border border-white/[0.07] rounded-2xl p-4 hover:border-emerald-500/20 transition-colors">
               <p className="text-white text-sm font-medium mb-1">{f.feature}</p>
-              <p className="text-white/40 text-xs leading-relaxed">
-                {f.reason}
-              </p>
+              <p className="text-zinc-500 text-xs leading-relaxed">{f.reason}</p>
             </div>
           ))}
         </div>
       </div>
+
       <div>
-        <h3 className="text-sm font-semibold text-red-400 mb-3 flex items-center gap-2 font-mono-display">
+        <h3 className="text-sm font-semibold text-red-400 mb-4 flex items-center gap-2">
           <span className="w-2 h-2 rounded-full bg-red-400" />
           Cut for Now ({scope.excluded.length})
         </h3>
         <div className="space-y-3">
           {scope.excluded.map((f, i) => (
-            <div
-              key={i}
-              className="bg-white/5 border border-white/10 rounded-xl p-4 opacity-50"
-            >
-              <p className="text-white text-sm font-medium mb-1 line-through decoration-white/30">
-                {f.feature}
-              </p>
-              <p className="text-white/40 text-xs leading-relaxed">
-                {f.reason}
-              </p>
+            <div key={i} className="bg-white/2 border border-white/5 rounded-2xl p-4 opacity-60">
+              <p className="text-zinc-400 text-sm font-medium mb-1 line-through decoration-zinc-600">{f.feature}</p>
+              <p className="text-zinc-600 text-xs leading-relaxed">{f.reason}</p>
             </div>
           ))}
         </div>
