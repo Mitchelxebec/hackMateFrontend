@@ -1,6 +1,6 @@
 import type { ApiResponse, GenerateResponse } from "../types";
 
-const BASE_URL = import.meta.env.VITE_API_URL ?? "http://localhost:3000";
+const BASE_URL = import.meta.env.VITE_API_URL ?? "https://hackmate-63hd.onrender.com";
 
 export async function generatePlan(
   projectIdea: string,
@@ -18,10 +18,11 @@ export async function generatePlan(
     const msg = err instanceof Error ? err.message : String(err);
     if (msg.toLowerCase().includes("failed to fetch") || msg.toLowerCase().includes("network")) {
       throw new Error(
-        "Cannot reach the server. Check your connection or the server may be starting up (cold start on Render can take ~30s)."
+        "Cannot reach the server. Check your connection or the server may be starting up (cold start on Render can take ~30s).",
+        { cause: err }
       );
     }
-    throw new Error(`Network error: ${msg}`);
+    throw new Error(`Network error: ${msg}`, { cause: err });
   }
 
   if (!res.ok) {
