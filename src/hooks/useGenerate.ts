@@ -9,6 +9,7 @@ export function useGenerate() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [lastIdea, setLastIdea] = useState("");
+  const [liveHash, setLiveHash] = useState<string | undefined>(undefined);
 
   useEffect(() => {
     try {
@@ -23,8 +24,13 @@ export function useGenerate() {
     setLoading(true);
     setError(null);
     setLastIdea(projectIdea);
+    setLiveHash(undefined);
     try {
       const data = await generatePlan(projectIdea);
+      // Set hash immediately so LoadingScreen can show it before transitioning
+      if (data.storageHash) setLiveHash(data.storageHash);
+      // Small delay so user sees the hash appear before the screen changes
+      await new Promise((r) => setTimeout(r, 1200));
       setResult(data);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
     } catch (err) {
@@ -37,8 +43,9 @@ export function useGenerate() {
   function reset() {
     setResult(null);
     setError(null);
+    setLiveHash(undefined);
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  return { result, loading, error, generate, reset, lastIdea };
+  return { result, loading, error, generate, reset, lastIdea, liveHash };
 }
