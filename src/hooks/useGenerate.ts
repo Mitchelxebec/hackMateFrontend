@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react";
+import { useAccount } from "wagmi";
 import type { GenerateResponse } from "../types";
 import { generatePlan } from "../services/api";
+import { addToHistory } from "../lib/history";
 
 const STORAGE_KEY = "hackpilot_last_session";
 
@@ -10,6 +12,7 @@ export function useGenerate() {
   const [error, setError] = useState<string | null>(null);
   const [lastIdea, setLastIdea] = useState("");
   const [liveHash, setLiveHash] = useState<string | undefined>(undefined);
+  const { address } = useAccount();
 
   useEffect(() => {
     try {
@@ -27,17 +30,23 @@ export function useGenerate() {
     setLiveHash(undefined);
     try {
       const data = await generatePlan(projectIdea);
-      // Set hash immediately so LoadingScreen can show it before transitioning
       if (data.storageHash) setLiveHash(data.storageHash);
-      // Small delay so user sees the hash appear before the screen changes
       await new Promise((r) => setTimeout(r, 1200));
       setResult(data);
       localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+      addToHistory(data, address);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
       setLoading(false);
     }
+  }
+
+  function loadPlan(plan: GenerateResponse) {
+    setResult(plan);
+    setError(null);
+    setLastIdea(plan.projectIdea);
+    setLiveHash(plan.storageHash);
   }
 
   function reset() {
@@ -47,5 +56,5 @@ export function useGenerate() {
     localStorage.removeItem(STORAGE_KEY);
   }
 
-  return { result, loading, error, generate, reset, lastIdea, liveHash };
+  return { result, loading, error, generate, loadPlan, reset, lastIdea, liveHash };
 }

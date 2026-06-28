@@ -7,12 +7,11 @@ import { fetchPlanByHash } from "./services/share";
 import type { GenerateResponse } from "./types";
 
 export default function App() {
-  const { result, loading, error, generate, reset, lastIdea, liveHash } = useGenerate();
+  const { result, loading, error, generate, loadPlan, reset, lastIdea, liveHash } = useGenerate();
   const [sharedPlan, setSharedPlan] = useState<GenerateResponse | null>(null);
   const [sharedLoading, setSharedLoading] = useState(false);
   const [sharedError, setSharedError] = useState<string | null>(null);
 
-  // Handle /plan/:hash route on mount
   useEffect(() => {
     const path = window.location.pathname;
     const match = path.match(/^\/plan\/(.+)$/);
@@ -28,7 +27,6 @@ export default function App() {
       .finally(() => setSharedLoading(false));
   }, []);
 
-  // Shared plan view
   if (sharedLoading) return <LoadingScreen idea="Loading shared plan from 0G Storage..." />;
 
   if (sharedError) {
@@ -51,9 +49,8 @@ export default function App() {
     return <ResultsPage result={sharedPlan} onReset={() => { window.history.pushState({}, "", "/"); setSharedPlan(null); }} />;
   }
 
-  // Normal app flow
   if (loading) return <LoadingScreen idea={lastIdea} storageHash={liveHash} />;
   if (result)  return <ResultsPage result={result} onReset={reset} />;
 
-  return <LandingPage onGenerate={generate} loading={loading} error={error} />;
+  return <LandingPage onGenerate={generate} onLoadPlan={loadPlan} loading={loading} error={error} />;
 }

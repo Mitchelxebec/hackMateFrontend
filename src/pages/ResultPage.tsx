@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { ArrowLeft, Copy, Check, BookOpen, Target, Layers, Database, Kanban, Download, Share2, ExternalLink } from "lucide-react";
+import { ArrowLeft, Copy, Check, BookOpen, Target, Layers, Database, Kanban, Download, Share2, ExternalLink, ShieldCheck } from "lucide-react";
 import type { GenerateResponse } from "../types";
 import { UserStoriesTab } from "../components/UserStoriesTab";
 import { MVPScopeTab } from "../components/MVPScopeTab";
@@ -9,6 +9,9 @@ import { SprintBoardTab } from "../components/SprintBoardTab";
 import logo from "../assets/HackthonTeammateLogo.png";
 import { exportToPDF } from "../lib/exportPDF";
 import { buildShareUrl } from "../services/share";
+import { ConnectWallet } from "../components/ConnectWallet";
+import { useAccount, useSignMessage, useWriteContract } from "wagmi";
+import { PLAN_REGISTRY_ABI, PLAN_REGISTRY_ADDRESS } from "../lib/contract";
 
 interface Props {
   result: GenerateResponse;
@@ -30,6 +33,46 @@ export function ResultsPage({ result, onReset }: Props) {
   const [copied, setCopied] = useState(false);
   const [shared, setShared] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [stamping, setStamping] = useState(false);
+  const [stamped, setStamped] = useState(false);
+  const [stampTx, setStampTx] = useState<string | null>(null);
+  const [sig, setSig] = useState<`0x${string}` | null>(null);
+
+  const { address, isConnected } = useAccount();
+  const { signMessageAsync } = useSignMessage();
+  const { writeContractAsync } = useWriteContract();
+
+  async function handleSign() {
+    if (!result.storageHash || !address) return;
+    try {
+      const signature = await signMessageAsync({
+        message: `HackPilot plan: ${result.storageHash}\nAddress: ${address}`,
+      });
+      setSig(signature);
+    } catch {
+      // user rejected or error
+    }
+  }
+
+  async function handleStamp() {
+    if (!result.storageHash || !address) return;
+    setStamping(true);
+    try {
+      const hash = result.storageHash as `0x${string}`;
+      const tx = await writeContractAsync({
+        address: PLAN_REGISTRY_ADDRESS,
+        abi: PLAN_REGISTRY_ABI,
+        functionName: "store",
+        args: [hash],
+      });
+      setStampTx(tx);
+      setStamped(true);
+    } catch {
+      // user rejected or error
+    } finally {
+      setStamping(false);
+    }
+  }
 
   async function handleExport() {
     setExporting(true);
@@ -116,8 +159,9 @@ export function ResultsPage({ result, onReset }: Props) {
           <p className="text-zinc-600 text-xs truncate hidden md:block max-w-xs lg:max-w-sm">{result.projectIdea}</p>
         </div>
 
-        {/* Right — icon-only on mobile, labeled on sm+ */}
+        {/* Right — wallet + actions */}
         <div className="flex items-center gap-1.5 shrink-0 ml-2">
+          <ConnectWallet />
           {/* Share via 0G */}
           {result.storageHash && (
             <button
@@ -136,7 +180,7 @@ export function ResultsPage({ result, onReset }: Props) {
             </button>
           )}
 
-          {/* Verify on-chain */}
+          {/* Verify on 0G */}
           {result.storageHash && (
             <a
               href={`https://chainscan-galileo.0g.ai/tx/${result.storageHash}`}
@@ -152,7 +196,62 @@ export function ResultsPage({ result, onReset }: Props) {
               title="Verify on 0G block explorer"
             >
               <ExternalLink size={13} />
-              <span className="hidden sm:inline">Verify on-chain</span>
+              <span className="hidden sm:inline">0G Explorer</span>
+            </a>
+          )}
+
+          {/* Sign to prove ownership */}
+          {result.storageHash && isConnected && !sig && !stamped && (
+            <button
+              onClick={handleSign}
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer"
+              style={{
+                background: "linear-gradient(135deg,rgba(234,179,8,0.15),rgba(202,138,4,0.2))",
+                border: "1px solid rgba(234,179,8,0.35)",
+                color: "#fde047",
+                backdropFilter: "blur(12px)",
+              }}
+              title="Prove ownership by signing"
+            >
+              <ShieldCheck size={13} />
+              <span className="hidden sm:inline">Sign to prove</span>
+            </button>
+          )}
+
+          {/* Stamp on-chain (only after signing) */}
+          {result.storageHash && isConnected && sig && !stamped && (
+            <button
+              onClick={handleStamp}
+              disabled={stamping}
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold transition-all cursor-pointer disabled:opacity-40"
+              style={{
+                background: "linear-gradient(135deg,rgba(16,185,129,0.15),rgba(5,150,105,0.2))",
+                border: "1px solid rgba(16,185,129,0.35)",
+                color: "#6ee7b7",
+                backdropFilter: "blur(12px)",
+              }}
+              title="Write plan hash to the blockchain"
+            >
+              {stamping ? <span className="w-3 h-3 border-2 border-emerald-400/30 border-t-emerald-400 rounded-full animate-spin" /> : <ShieldCheck size={13} />}
+              <span className="hidden sm:inline">{stamping ? "Stamping..." : "Stamp on-chain"}</span>
+            </button>
+          )}
+
+          {stamped && stampTx && (
+            <a
+              href={`https://sepolia.etherscan.io/tx/${stampTx}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-1.5 px-2 sm:px-3 py-1.5 rounded-lg text-xs font-semibold"
+              style={{
+                background: "linear-gradient(135deg,rgba(16,185,129,0.2),rgba(5,150,105,0.3))",
+                border: "1px solid rgba(16,185,129,0.5)",
+                color: "#34d399",
+                backdropFilter: "blur(12px)",
+              }}
+            >
+              <Check size={13} />
+              <span className="hidden sm:inline">Stamped! View tx</span>
             </a>
           )}
 
@@ -187,6 +286,37 @@ export function ResultsPage({ result, onReset }: Props) {
           </button>
         </div>
       </header>
+
+      {/* ── Web3 status bar ── */}
+      {isConnected && (
+        <div
+          className="relative z-10 flex items-center justify-center gap-4 px-4 py-2 text-[11px]"
+          style={{
+            background: "rgba(7,4,15,0.5)",
+            borderBottom: "1px solid rgba(139,92,246,0.08)",
+          }}
+        >
+          <span className="text-emerald-500/70 flex items-center gap-1">
+            <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block" />
+            {address?.slice(0, 6)}...{address?.slice(-4)}
+          </span>
+          {sig && (
+            <span className="text-zinc-600 flex items-center gap-1">
+              <ShieldCheck size={11} className="text-amber-500" />
+              Signed
+            </span>
+          )}
+          {stamped && (
+            <span className="text-emerald-500/70 flex items-center gap-1">
+              <Check size={11} />
+              Stamped on-chain
+            </span>
+          )}
+          {!isConnected && (
+            <span className="text-zinc-700">Connect wallet to prove ownership</span>
+          )}
+        </div>
+      )}
 
       {/* ── Tab bar ── */}
       <div

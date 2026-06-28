@@ -1,17 +1,30 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { ArrowUp, Zap, Database, GitBranch } from "lucide-react";
 import logo from "../assets/HackthonTeammateLogo.png";
 import TextType from "../components/TextType";
+import { ConnectWallet } from "../components/ConnectWallet";
+import { PlanHistory } from "../components/PlanHistory";
+import { loadHistory, getPlanById } from "../lib/history";
+import { useAccount } from "wagmi";
+import type { GenerateResponse } from "../types";
 
 interface Props {
   onGenerate: (idea: string) => void;
+  onLoadPlan: (plan: GenerateResponse) => void;
   loading: boolean;
   error: string | null;
 }
 
-export function LandingPage({ onGenerate, loading, error }: Props) {
+export function LandingPage({ onGenerate, onLoadPlan, loading, error }: Props) {
   const [idea, setIdea] = useState("");
+  const { address } = useAccount();
 
+  const history = useMemo(() => loadHistory(address), [address]);
+
+  function handleSelectHistory(record: { id: string }) {
+    const plan = getPlanById(record.id);
+    if (plan) onLoadPlan(plan);
+  }
   function handleSubmit() {
     const trimmed = idea.trim();
     if (trimmed.length < 10 || loading) return;
@@ -30,6 +43,10 @@ export function LandingPage({ onGenerate, loading, error }: Props) {
       className="min-h-screen bg-[#07040f] text-white flex flex-col items-center justify-center relative overflow-hidden antialiased selection:bg-violet-500/30"
       style={{ fontFamily: "'Plus Jakarta Sans', system-ui, -apple-system, sans-serif" }}
     >
+      {/* ── Header ── */}
+      <div className="absolute top-0 inset-x-0 z-20 flex items-center justify-end px-4 md:px-10 py-4">
+        <ConnectWallet />
+      </div>
       {/* ── Background layers ── */}
 
       {/* Solid color patches so backdrop-filter has something to blur */}
@@ -181,6 +198,9 @@ export function LandingPage({ onGenerate, loading, error }: Props) {
             </div>
           ))}
         </div>
+
+        {/* Past plans */}
+        <PlanHistory records={history} onSelect={handleSelectHistory} />
 
       </main>
     </div>
